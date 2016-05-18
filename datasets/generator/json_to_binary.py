@@ -44,7 +44,7 @@ def process_file(data, size=(32, 32)):
         goal_a[i] = data[i]['goal_team_a']
         goal_b[i] = data[i]['goal_team_b']
         tick[i] = data[i]['tick']
-        screen[i] = np.array(Image.fromarray(np.array(data[i]['screen']),'RGB').resize(size))
+        screen[i] = np.array(Image.fromarray(np.array(data[i]['screen']).astype(np.uint8),'RGB').resize(size))
     return tick, second, milisecond, goal_a, goal_b, screen
 
 
@@ -55,9 +55,10 @@ def mark_pre_goal(goals, seconds_in_future=2):
     while i < n:
         to = min(n-1, i+seconds_in_future)
         if goals[to]==1:
-            res[i]=1
-            # We only mark the goal once, and then skip 15 seconds of celebrations
-            i+=15
+            # Mark from here till goal as 1s
+            res[i:(to+1)]=1
+            # We only mark the goal once, and then skip 10 seconds of celebrations
+            i+=10
             continue
         i+=1
     return(res)
@@ -86,5 +87,6 @@ def store_dataset_for_tf_as_cifar(goals, screens, directory, new_every_n_lines=1
 
 
 ticks, seconds, miliseconds, goal_as, goal_bs, screens = load_dataset("/home/eitan/Documents/Tesis/Datasets/txts/alone")
-goal_as = mark_pre_goal(goal_as, seconds_in_future=2)
+# Goal de cualquier equipo as+bs
+goal_as = mark_pre_goal(goal_as+goal_bs, seconds_in_future=2)
 store_dataset_for_tf_as_cifar(goal_as, screens,"/home/eitan/Documents/Tesis/Datasets/bin", new_every_n_lines=16000)
