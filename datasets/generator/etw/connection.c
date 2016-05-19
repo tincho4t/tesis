@@ -4,6 +4,9 @@
 #include "SDL.h"
 #include <ctype.h>
 
+#include <sys/time.h>
+#include <stdio.h>
+
 #define OWN_GOAL 64
 
 
@@ -183,6 +186,20 @@ BOOL StartGame(void)
     return TRUE;
 }
 
+char *folder = "/media/ubuntu/storage/dataset/"; // Ruta donde se guarda el dataset
+char *base_filename = "data"; // Archivos donde guardo el dataset
+char *filename = NULL;
+char *extension = ".json";
+
+char* concat(char *s1, char *s2)
+{
+    char *result = malloc(strlen(s1)+strlen(s2)+1);//+1 for the zero-terminator
+    //in real code you would check for errors in malloc here
+    strcpy(result, s1);
+    strcat(result, s2);
+    return result;
+}
+
 WORD StartMatch(BYTE team1,BYTE team2)
 {
     FILE *f;
@@ -191,6 +208,16 @@ WORD StartMatch(BYTE team1,BYTE team2)
     int t;
 
     parent_menu=current_menu;
+    
+    // Obtengo el timestamp y lo convierto a string
+    struct timeval start_game;
+    gettimeofday(&start_game, NULL);
+    char timestamp_in_string [30];
+    sprintf (timestamp_in_string, "%lu", start_game.tv_sec);
+    
+    filename = concat(folder, teamlist[team1].name);
+    filename = concat(filename, "-");
+    filename = concat(filename, teamlist[team2].name);
 
 // temporanea, solo x evitare l'apertura della squadra!
     if(network_game)
@@ -489,6 +516,21 @@ WORD StartMatch(BYTE team1,BYTE team2)
             int gol_a=0,gol_b=0;
 
             if(sscanf(buffer,"%d-%d",&gol_a,&gol_b)==2)    {
+                char gol_a_string [5];
+                sprintf (gol_a_string, "%d", gol_a);
+                char gol_b_string [5];
+                sprintf (gol_b_string, "%d", gol_b);
+                
+                char * newfilename = concat(filename, "_");
+                newfilename = concat(newfilename, gol_a_string);
+                newfilename = concat(newfilename, "_");
+                newfilename = concat(newfilename, gol_b_string);
+                newfilename = concat(newfilename, "-");
+                newfilename = concat(newfilename, timestamp_in_string);
+                newfilename = concat(newfilename, extension);
+                
+                rename(filename, newfilename);
+                
                 D(bug("Result before swap %d-%d\n", gol_a, gol_b));
                 
                 if(team_swap != arcade) { // this is the fix for the arcade match bug

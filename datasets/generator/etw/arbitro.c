@@ -2,9 +2,11 @@
 #include "SDL.h"
 #include <sys/time.h>
 
+
 #define OWN_GOAL 64
 extern SDL_Surface *screen;
 extern BOOL replay_done;
+extern char *filename;
 UBYTE goal_array[GA_SIZE],goal_minute[GA_SIZE],goal_team[GA_SIZE];
 char ColoreCartellino[8]={ESPULSIONE,ESPULSIONE,ESPULSIONE,ESPULSIONE,ESPULSIONE,ESPULSIONE,ESPULSIONE,ESPULSIONE};
 char golrig[2]={0,0};
@@ -100,9 +102,8 @@ void saveScreen(void)
 		}
 	}
 	SDL_UnlockSurface(screen);
-
+    
 	/////GUARDO DATA ///////////////////////////////////////
-	char *filename = "/media/ubuntu/storage/dataset/data.txt";
 	FILE *f = fopen(filename, "a");
     if (f == NULL)
     {
@@ -144,7 +145,7 @@ void HandleReferee(void)
     }
     gettimeofday(&stop, NULL);
 
-    D(bug("Tick: %d, microseconds: %lu, Comando:%d w:%d, h:%d\n", g->Tick, stop.tv_usec - start.tv_usec ,g->Comando, screen->w, screen->h));
+    //D(bug("Tick: %d, microseconds: %lu, Comando:%d w:%d, h:%d\n", g->Tick, stop.tv_usec - start.tv_usec ,g->Comando, screen->w, screen->h));
     
     if(ticks%50 == 0) saveScreen();
     ticks++; // Incremento los ticks
