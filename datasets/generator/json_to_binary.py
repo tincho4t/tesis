@@ -7,16 +7,22 @@ import copy
 import gc
 import rlcompleter, readline
 from PIL import Image
+import gc
 readline.parse_and_bind('tab:complete')
 
 def load_and_proccess_dataset(raw_directory, bin_directory, size=(32, 32)):
     for filename in listdir(raw_directory):
         with open(raw_directory+"/"+filename) as data_file:
+            if(filename == ".DS_Store"):
+                continue
             print (raw_directory+"/"+filename)
+            gc.collect() # Clean memory of last iteration
             data = json.load(data_file)
             ticks, seconds, miliseconds, goal_as, goal_bs, screens = process_file(data, size)
+            data = None
+            gc.collect()
             goals = mark_pre_goal(goal_as+goal_bs, seconds_in_future=2)
-            store__single_dataset_for_tf_as_cifar(goals, screens, bin_directory, filename, new_every_n_lines=16000, size=size)
+            store__single_dataset_for_tf_as_cifar(goals, screens, bin_directory, filename.replace(".json",""), new_every_n_lines=16000, size=size)
 
 def store__single_dataset_for_tf_as_cifar(goals, screens, directory, filename, new_every_n_lines=16000, size=(32, 32)):
     n = len(goals)
@@ -33,7 +39,7 @@ def store__single_dataset_for_tf_as_cifar(goals, screens, directory, filename, n
                 for x in range(0,size[0]):
                     for y in range(0,size[1]):
                         data.append(int(screens[i][x,y][color]))
-        output_file = open(directory+"/"+ filename+str(int(j/new_every_n_lines))+".bin", 'wb')
+        output_file = open(directory+"/"+ filename+"-"+str(int(j/new_every_n_lines))+".bin", 'wb')
         data.tofile(output_file)
         output_file.close()
         j += new_every_n_lines
