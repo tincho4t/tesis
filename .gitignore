@@ -29,3 +29,7 @@
 *.hex
 
 *.pyc
+*.gz
+*.zip
+*.bin
+*.json

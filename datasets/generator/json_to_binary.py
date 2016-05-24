@@ -92,7 +92,8 @@ def mark_pre_goal(goals, seconds_in_future=2):
         to = min(n-1, i+seconds_in_future)
         if goals[to]==1:
             # Mark from here till goal as 1s
-            res[i:(to+1)]=1
+            # res[i:(to+1)]=1
+            res[i]=1
             # We only mark the goal once, and then skip 10 seconds of celebrations
             i+=10
             continue
